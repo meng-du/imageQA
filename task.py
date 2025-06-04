@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-# TODO Black background for image?
-# TODO make image size the same
-# TODO add eyetracker
 
-from pygaze import eyetracker
+import pygaze
+from pygaze import eyetracker, libscreen
 import random
 import os
 import pickle
@@ -12,15 +10,23 @@ from psychopy_util import *
 from config import *
 
 
-def show_one_trial(presenter, image, img_bg, questions, feedbacks):
+def show_one_trial(presenter, image, img_bg, questions, feedbacks, trialname, eyetracker=None):
     presenter.show_fixation(FIXATION_TIME)
     # show instruction
     presenter.show_instructions(questions['question'])
+    if eyetracker:
+        eyetracker.start_recording()
+        eyetracker.log(trialname + ' Showing fixation')
     presenter.show_fixation(FIXATION_TIME)
     # show image
     image.pos = presenter.CENTRAL_POS
+    if eyetracker:
+        eyetracker.log(trialname + ' Showing image')
     presenter.draw_stimuli_for_duration([img_bg, image], duration=IMG_MIN_WAIT)
     response = presenter.draw_stimuli_for_response([img_bg, image], 'space')
+    if eyetracker:
+        eyetracker.log(trialname + ' End of image display')
+        eyetracker.stop_recording()
     # show answer
     ans_stim = visual.TextStim(presenter.window, text=questions['answer'], pos=presenter.CENTRAL_POS, wrapWidth=1.5)
     response = presenter.draw_stimuli_for_response(ans_stim, RESPONSE_KEYS, max_wait=RESPONSE_TIME)
@@ -76,14 +82,18 @@ def main():
     no_resp_feedback = [incorrect_bg, visual.TextStim(presenter.window, FEEDBACK_SLOW)]
 
     # set up eyetracker
-    # tracker = eyetracker.EyeTracker(presenter, trackertype='eyetribe')
+    pygaze.settings.DISPTYPE = 'psychopy'
+    pygaze.expdisplay = presenter.window
+    tracker = eyetracker.EyeTracker(libscreen.Display(), trackertype='eyetribe', logfile=f'log/{str(sid)}_eyetribe') # 'eyetribe'
+    tracker.calibrate()
 
     # show instructions
     for instr in INSTR_BEGIN:
         presenter.show_instructions(instr)
     # show examples
     for t, img in enumerate(EXAMPLE_QUESTIONS):
-        data = show_one_trial(presenter, ex_images[img], black_bg, EXAMPLE_QUESTIONS[img], (resp_feedback, no_resp_feedback))
+        data = show_one_trial(presenter, ex_images[img], black_bg, EXAMPLE_QUESTIONS[img], (resp_feedback, no_resp_feedback), f'example{t}', tracker)
+        # log example trial data
         infoLogger.logger.info('Writing to data file')
         dataLogger.write_json({'example_trial_index': t, 'response': data})
 
@@ -101,7 +111,7 @@ def main():
         random.shuffle(imglist)
         presenter.show_instructions(INSTR_BLOCKS.format(INSTR_BLOCK_THEME[b]))
         for t, img in enumerate(imglist):
-            data = show_one_trial(presenter, images[img], black_bg, questions[img][b], (resp_feedback, no_resp_feedback))
+            data = show_one_trial(presenter, images[img], black_bg, questions[img][b], (resp_feedback, no_resp_feedback), f'{b}_{t}', tracker)
             infoLogger.logger.info('Writing to data file')
             dataLogger.write_json({'block': b, 'trial_index': t, 'response': data})
 

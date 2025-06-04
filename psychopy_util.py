@@ -56,6 +56,7 @@ class Presenter(object):
         :param trigger: an ASCII character trigger when this is an fMRI task
         """
         self.window = window if window is not None else visual.Window(fullscr=fullscreen)
+        self.window.setMouseVisible(False)
         self.expInfo = info.RunTimeInfo(win=window, refreshTest=None, verbose=False)
         self.trigger = trigger
         # logging
@@ -72,7 +73,6 @@ class Presenter(object):
         self.FEEDBACK_POS_Y_DIFF = -0.4
         # Image ratio
         self.IMG_WIDTH = 1040. / 1920. * self.window.size[0] / self.window.size[1] * 2.
-        print(self.IMG_WIDTH)
 
     def pixel2norm(self, length):
         """
