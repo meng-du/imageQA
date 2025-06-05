@@ -68,7 +68,7 @@ def main():
 
     # load data
     images = presenter.load_all_images(IMG_FOLDER, '.png')
-    with open(os.getcwd() + '/questions.pkl', 'rb') as f:
+    with open(os.path.join(os.getcwd(), QUESTION_FILE), 'rb') as f:
         questions = pickle.load(f)
     ex_images = presenter.load_all_images(EX_IMG_FOLDER, '.jpg')
 

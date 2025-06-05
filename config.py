@@ -3,6 +3,7 @@ IMG_FOLDER = 'images/'
 EX_IMG_FOLDER = 'example_images/'
 DATA_FOLDER = 'data/'
 LOG_FOLDER = 'log/'
+QUESTION_FILE = '12questions.pkl'
 # Parameters
 RESPONSE_KEYS = ('g', 'h')  # 'g' for correct/likely, 'h' for incorrect/unlikely
 IMG_MIN_WAIT = 3  # Minimum time to show each image in seconds
