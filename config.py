@@ -8,7 +8,7 @@ QUESTION_FILE = 'questions.pkl'
 RESPONSE_KEYS = ('g', 'h')  # 'g' for correct/likely, 'h' for incorrect/unlikely
 IMG_MIN_WAIT = 3  # Minimum time to show each image in seconds
 FIXATION_TIME = 1.0
-RESPONSE_TIME = 2.0
+RESPONSE_TIME = 1.8
 # Feedbacks
 FEEDBACK_RIGHT = 'Correct!'
 FEEDBACK_WRONG = 'WRONG'
@@ -21,12 +21,12 @@ BLACK = '#000000'
 INSTR_BEGIN = [
     'Welcome! In this experiment, you will look at images and answer questions about them.',
     'Each block of images will feature a different type of question.',
-    'For each image, you will first see a question, followed by the image, and then a potential answer to the question.\n\n' \
-        'The answer will either be correct/likely or incorrect/unlikely.',
+    'For each image, you will first see a question, followed by the image, and then a statement that potentially answers the question.\n\n' \
+        'The statement will either be correct/likely or incorrect/unlikely.',
     f'You can view the image for as long as you like, but no less than {int(IMG_MIN_WAIT)} seconds. ' \
-        'When you\'re ready, press SPACE to dismiss the image and see the potential answer.',
-    'Your task is to decide whether the answer is correct/likely or incorrect/unlikely by pressing G or H on the keyboard.',
-    'Importantly, the answers will be shown very briefly, so please pay close attention while viewing the image.\n\n' \
+        'When you\'re ready, press SPACE to dismiss the image and see the statement.',
+    'Your task is to decide whether the statement is correct/likely or incorrect/unlikely by pressing G or H on the keyboard.',
+    'Importantly, the statements will be shown very briefly, so please pay close attention while viewing the image.\n\n' \
         'Make sure you have a correct answer in mind while viewing the image, and then respond as quickly as possible.',
     'In the following examples, you will be asked about shapes in the images.\n\n',
 ]
@@ -34,7 +34,7 @@ INSTR_EXP = 'Great job completing the examples!\n\n' \
             'If you have any questions, please ask the experimenter now.\n\n' \
             'If not, please make sure you are comfortable and ready to start the experiment.'
 INSTR_BLOCKS = 'In the following block, you will be asked {}.\n\n' \
-               'Again, the answers will be shown very briefly, so please pay close attention while viewing the image ' \
+               'Again, the statements will be shown very briefly, so please pay close attention while viewing the image ' \
                'and have a correct answer in mind, then respond as quickly as possible.'
 INSTR_BLOCK_THEME = {
     'fact-ppl': 'about facts in the images',

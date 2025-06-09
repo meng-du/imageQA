@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# TODO image size
 
 import pygaze
 from pygaze import eyetracker, libscreen
@@ -11,10 +10,10 @@ from psychopy_util import *
 from config import *
 
 
-def show_one_trial(presenter, image, img_bg, questions, feedbacks, trialname, eyetracker=None):
+def show_one_trial(presenter, image, img_bg, question, feedbacks, trialname, eyetracker=None):
     presenter.show_fixation(FIXATION_TIME)
     # show instruction
-    presenter.show_instructions(questions['question'])
+    presenter.show_instructions(question['question'])
     if eyetracker:
         eyetracker.start_recording()
         eyetracker.log(trialname + ' Showing fixation')
@@ -29,18 +28,21 @@ def show_one_trial(presenter, image, img_bg, questions, feedbacks, trialname, ey
         eyetracker.log(trialname + ' End of image display ' + image._imName)
         eyetracker.stop_recording()
     # show answer and get response
-    ans_stim = visual.TextStim(presenter.window, text=questions['answer'], pos=presenter.CENTRAL_POS, wrapWidth=1.5)
+    ans_stim = visual.TextStim(presenter.window, text=question['answer'], pos=presenter.CENTRAL_POS, wrapWidth=1.5)
     response = presenter.draw_stimuli_for_response(ans_stim, RESPONSE_KEYS, max_wait=RESPONSE_TIME)
-    response['participant_correct'] = response[0] == questions['correct']
+    data = {
+        'response': response,
+        'response_correct': (response[0] == question['correct']) if response else None
+    }
+    data.update(question)
     # show feedback
     feedback_stims = None
     if response is None:
         feedback_stims = feedbacks[1]
     else:
-        feedback_stims = feedbacks[0][int(response['participant_correct'])]
+        feedback_stims = feedbacks[0][int(data['response_correct'])]
     presenter.draw_stimuli_for_duration(feedback_stims, duration=1)
-    response.update(questions)
-    return response
+    return data
 
 
 def validation(items):
@@ -116,8 +118,9 @@ def main():
         presenter.show_instructions(INSTR_BLOCKS.format(INSTR_BLOCK_THEME[b]))
         for t, img in enumerate(imglist):
             data = show_one_trial(presenter, images[img], black_bg, questions[img][b], (resp_feedback, no_resp_feedback), f'{b}_{t}', tracker)
+            data.update({'block': b, 'trial_index': t, 'image': img})
             infoLogger.logger.info('Writing to data file')
-            dataLogger.write_json({'block': b, 'trial_index': t, 'response': data, 'image': img})
+            dataLogger.write_json(data)
 
     # end of experiment
     presenter.show_instructions(INSTR_END)
