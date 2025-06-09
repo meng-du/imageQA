@@ -56,15 +56,16 @@ def validation(items):
 
 def main():
     # subject ID dialog
-    sinfo = {'ID': '', 'Fullscreen': ['Yes', 'No']}
+    sinfo = {'ID': '', 'Part': ['1', '2', '3'], 'Fullscreen': ['Yes', 'No']}
     show_form_dialog(sinfo, validation, order=['ID', 'Fullscreen'])
     sid = int(sinfo['ID'])
+    part = int(sinfo['Part'])
     random.seed(sid)
 
     # create logging file
-    infoLogger = DataLogger(LOG_FOLDER, str(sid) + '.log', 'info_logger', logging_info=True)
+    infoLogger = DataLogger(LOG_FOLDER, f'{sid}pt{part}.log', 'info_logger', logging_info=True)
     # create data file
-    dataLogger = DataLogger(DATA_FOLDER, str(sid) + '.txt', 'data_logger')
+    dataLogger = DataLogger(DATA_FOLDER, f'{sid}pt{part}.txt', 'data_logger')
     # save info from the dialog box
     dataLogger.write_json({
         k: str(sinfo[k]) for k in sinfo.keys()
@@ -90,18 +91,8 @@ def main():
     # set up eyetracker
     pygaze.settings.DISPTYPE = 'psychopy'
     pygaze.expdisplay = presenter.window
-    tracker = eyetracker.EyeTracker(libscreen.Display(), trackertype='eyetribe', logfile=f'log/{str(sid)}_eyetribe') # 'eyetribe'
+    tracker = eyetracker.EyeTracker(libscreen.Display(), trackertype='eyetribe', logfile=f'log/{str(sid)}pt{part}_eyetribe') # 'eyetribe'
     tracker.calibrate()
-
-    # show instructions
-    for instr in INSTR_BEGIN:
-        presenter.show_instructions(instr)
-    # show examples
-    for t, img in enumerate(EXAMPLE_QUESTIONS):
-        data = show_one_trial(presenter, ex_images[img], black_bg, EXAMPLE_QUESTIONS[img], (resp_feedback, no_resp_feedback), f'example{t}', tracker)
-        # log example trial data
-        infoLogger.logger.info('Writing to data file')
-        dataLogger.write_json({'example_trial_index': t, 'response': data})
 
     # randomization
     imglist = list(questions.keys())
@@ -110,6 +101,23 @@ def main():
     random.shuffle(blocks1)
     random.shuffle(blocks2)
     blocks = blocks1 + blocks2  # fact blocks at the end
+    if part == 1:
+        blocks = blocks[:2]
+    elif part == 2:
+        blocks = blocks[2:4]
+    elif part == 3:
+        blocks = blocks[4:]
+    
+    if part == 1:
+        # show instructions
+        for instr in INSTR_BEGIN:
+            presenter.show_instructions(instr)
+        # show examples
+        for t, img in enumerate(EXAMPLE_QUESTIONS):
+            data = show_one_trial(presenter, ex_images[img], black_bg, EXAMPLE_QUESTIONS[img], (resp_feedback, no_resp_feedback), f'example{t}', tracker)
+            # log example trial data
+            infoLogger.logger.info('Writing to data file')
+            dataLogger.write_json({'example_trial_index': t, 'response': data})
 
     # show experiment
     presenter.show_instructions(INSTR_EXP)

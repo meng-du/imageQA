@@ -30,7 +30,7 @@ INSTR_BEGIN = [
         'Make sure you have a correct answer in mind while viewing the image, and then respond as quickly as possible.',
     'In the following examples, you will be asked about shapes in the images.\n\n',
 ]
-INSTR_EXP = 'Great job completing the examples!\n\n' \
+INSTR_EXP = 'Great job completing the last block!\n\n' \
             'If you have any questions, please ask the experimenter now.\n\n' \
             'If not, please make sure you are comfortable and ready to start the experiment.'
 INSTR_BLOCKS = 'In the following block, you will be asked {}.\n\n' \
@@ -65,4 +65,4 @@ EXAMPLE_QUESTIONS = {
     }
 }
 
-INSTR_END = 'This is the end of the experiment.\n\nThank you for your participation!'
+INSTR_END = 'This is the end of this part of the experiment.\n\nThank you for your participation!'
