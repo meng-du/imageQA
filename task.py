@@ -91,7 +91,6 @@ def main():
     pygaze.settings.DISPTYPE = 'psychopy'
     pygaze.expdisplay = presenter.window
     tracker = eyetracker.EyeTracker(libscreen.Display(), trackertype='eyetribe', logfile=f'log/{str(sid)}_eyetribe') # 'eyetribe'
-    tracker.calibrate()
 
     # show instructions
     for instr in INSTR_BEGIN:
