@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+# TODO image size
 
 import pygaze
 from pygaze import eyetracker, libscreen
@@ -21,22 +22,24 @@ def show_one_trial(presenter, image, img_bg, questions, feedbacks, trialname, ey
     # show image
     image.pos = presenter.CENTRAL_POS
     if eyetracker:
-        eyetracker.log(trialname + ' Showing image')
+        eyetracker.log(trialname + ' Showing image ' + image._imName)
     presenter.draw_stimuli_for_duration([img_bg, image], duration=IMG_MIN_WAIT)
     response = presenter.draw_stimuli_for_response([img_bg, image], 'space')
     if eyetracker:
-        eyetracker.log(trialname + ' End of image display')
+        eyetracker.log(trialname + ' End of image display ' + image._imName)
         eyetracker.stop_recording()
-    # show answer
+    # show answer and get response
     ans_stim = visual.TextStim(presenter.window, text=questions['answer'], pos=presenter.CENTRAL_POS, wrapWidth=1.5)
     response = presenter.draw_stimuli_for_response(ans_stim, RESPONSE_KEYS, max_wait=RESPONSE_TIME)
+    response['participant_correct'] = response[0] == questions['correct']
     # show feedback
     feedback_stims = None
     if response is None:
         feedback_stims = feedbacks[1]
     else:
-        feedback_stims = feedbacks[0][int(response[0] == questions['correct'])]
+        feedback_stims = feedbacks[0][int(response['participant_correct'])]
     presenter.draw_stimuli_for_duration(feedback_stims, duration=1)
+    response.update(questions)
     return response
 
 
@@ -54,6 +57,7 @@ def main():
     sinfo = {'ID': '', 'Fullscreen': ['Yes', 'No']}
     show_form_dialog(sinfo, validation, order=['ID', 'Fullscreen'])
     sid = int(sinfo['ID'])
+    random.seed(sid)
 
     # create logging file
     infoLogger = DataLogger(LOG_FOLDER, str(sid) + '.log', 'info_logger', logging_info=True)
@@ -113,7 +117,7 @@ def main():
         for t, img in enumerate(imglist):
             data = show_one_trial(presenter, images[img], black_bg, questions[img][b], (resp_feedback, no_resp_feedback), f'{b}_{t}', tracker)
             infoLogger.logger.info('Writing to data file')
-            dataLogger.write_json({'block': b, 'trial_index': t, 'response': data})
+            dataLogger.write_json({'block': b, 'trial_index': t, 'response': data, 'image': img})
 
     # end of experiment
     presenter.show_instructions(INSTR_END)
