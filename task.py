@@ -77,7 +77,8 @@ def main():
     images = presenter.load_all_images(IMG_FOLDER, '.png')
     with open(os.path.join(os.getcwd(), QUESTION_FILE), 'rb') as f:
         questions = pickle.load(f)
-    ex_images = presenter.load_all_images(EX_IMG_FOLDER, '.jpg')
+    if part == 1:
+        ex_images = presenter.load_all_images(EX_IMG_FOLDER, '.jpg')
 
     # image background
     black_bg = visual.Rect(presenter.window, width=2.1, height=2.1, fillColor=BLACK)
@@ -106,7 +107,7 @@ def main():
         blocks = blocks[2:4]
     elif part == 3:
         blocks = blocks[4:]
-    
+
     if part == 1:
         # show instructions
         for instr in INSTR_BEGIN:
