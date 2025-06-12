@@ -56,7 +56,7 @@ def validation(items):
 
 def main():
     # subject ID dialog
-    sinfo = {'ID': '', 'Part': ['1', '2', '3'], 'Fullscreen': ['Yes', 'No']}
+    sinfo = {'ID': '', 'Part': ['1', '2', '3', '4'], 'Fullscreen': ['Yes', 'No']}
     show_form_dialog(sinfo, validation, order=['ID', 'Fullscreen'])
     sid = int(sinfo['ID'])
     part = int(sinfo['Part'])
@@ -106,7 +106,9 @@ def main():
     elif part == 2:
         blocks = blocks[2:4]
     elif part == 3:
-        blocks = blocks[4:]
+        blocks = blocks[4:6]
+    elif part == 4:
+        blocks = blocks[6:]
 
     if part == 1:
         # show instructions
