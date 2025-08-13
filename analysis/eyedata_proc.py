@@ -4,6 +4,7 @@ import numpy as np
 import pickle as pkl
 from PIL import Image, ImageDraw
 import seaborn as sns
+from tqdm import tqdm
 
 
 SCREEN_SIZE = (1920, 1080)
@@ -95,7 +96,64 @@ def draw_on_image(eye_data, img_path, coord_type='raw', fix=False):
             new_img.save(os.path.join(img_path, 'analysis', 'images', f'{im}_{b}_{coord_type}.jpg'))
 
 
+def reformat4vipllava(coord_type='avg', fix=False):
+    X_START = (SCREEN_SIZE[0] - SCREEN_SIZE[1]) // 2
+    X_END = X_START + SCREEN_SIZE[1]
+    UNIT_LENGTH = SCREEN_SIZE[1] / 24  # 24x24 Vipllava attention maps
+
+    eye_data = pkl.load(open('eyedata.pkl', 'rb'))
+    attn = {}
+    for sid in tqdm(eye_data):
+        for imgname in eye_data[sid]:
+            im = imgname.split('/')[-1].split('.')[0]
+            attn[im] = {}
+            for block in eye_data[sid][imgname]:
+                attn[im][block] = np.zeros((24, 24))
+                data = eye_data[sid][imgname][block]
+                coords = np.array([*zip(data[coord_type + 'x'], data[coord_type + 'y'])])
+                for i, coord in enumerate(coords):
+                    if fix and data['fix'][i] != 'True':
+                        continue
+                    x, y = coord
+                    if X_START <= x <= X_END and 0 <= y <= SCREEN_SIZE[1]:
+                        xi = int((x - X_START) // UNIT_LENGTH)
+                        yi = int(y // UNIT_LENGTH)
+                        attn[im][block][yi, xi] += 1
+    fixname = 'fix' if fix else 'all'
+    with open(f'eyedata_reformatted4vipllava_{coord_type}_{fixname}.pkl', 'wb') as f:
+        pkl.dump(attn, f)
+
+
+def aggregate(coord_type='avg', fix=False):
+    UNIT_LENGTH = 24
+
+    eye_data = pkl.load(open('/Users/me/repos/bio_ann/imageQA/analysis/eyedata.pkl', 'rb'))
+    attn = {}
+    for sid in tqdm(eye_data):
+        for imgname in eye_data[sid]:
+            im = imgname.split('/')[-1].split('.')[0]
+            attn[im] = {}
+            for block in eye_data[sid][imgname]:
+                attn[im][block] = np.zeros((SCREEN_SIZE[1] // UNIT_LENGTH, SCREEN_SIZE[0] // UNIT_LENGTH))
+                data = eye_data[sid][imgname][block]
+                coords = np.array([*zip(data[coord_type + 'x'], data[coord_type + 'y'])])
+                for i, coord in enumerate(coords):
+                    if fix and data['fix'][i] != 'True':
+                        continue
+                    x, y = coord
+                    if 0 <= x <= SCREEN_SIZE[0] and 0 <= y <= SCREEN_SIZE[1]:
+                        xi = int(x // UNIT_LENGTH)
+                        yi = int(y // UNIT_LENGTH)
+                        attn[im][block][yi, xi] += 1
+    fixname = 'fix' if fix else 'all'
+    with open(f'eyedata_aggregated_{coord_type}_{fixname}.pkl', 'wb') as f:
+        pkl.dump(attn, f)
+
+
+
 if __name__ == '__main__':
     # process_all_eyetribe_data()
-    draw_on_image('/Users/me/repos/bio_ann/imageQA/analysis/eyedata.pkl', '/Users/me/repos/bio_ann/imageQA/', 'raw', fix=False)
-    draw_on_image('/Users/me/repos/bio_ann/imageQA/analysis/eyedata.pkl', '/Users/me/repos/bio_ann/imageQA/', 'avg', fix=False)
+    # draw_on_image('/Users/me/repos/bio_ann/imageQA/analysis/eyedata.pkl', '/Users/me/repos/bio_ann/imageQA/', 'raw', fix=False)
+    # draw_on_image('/Users/me/repos/bio_ann/imageQA/analysis/eyedata.pkl', '/Users/me/repos/bio_ann/imageQA/', 'avg', fix=False)
+    # reformat4vipllava(coord_type='raw', fix=False)
+    aggregate(coord_type='raw', fix=True)
